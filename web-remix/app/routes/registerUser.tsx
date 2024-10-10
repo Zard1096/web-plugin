@@ -58,6 +58,7 @@ export async function loader({
     }
 
     const { user: newUser, error } = await insertDBUser(username, password);
+    console.info('====qqq register newUser', newUser)
     if (error) {
         session.flash("error", error);
         return redirect("/registerUser", {

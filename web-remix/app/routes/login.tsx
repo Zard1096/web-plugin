@@ -15,7 +15,7 @@ import type {
       request.headers.get("Cookie")
     );
 
-    console.info('\n=====get cookie', session.get('userId'));
+    console.info('\n=====get cookie', session, session.get('userId'));
 
     if (session.has("userId")) {
       // Redirect to the home page if they are already signed in.
