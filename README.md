@@ -32,10 +32,18 @@ config/config/bot.yaml
 ```
 
 
-将`lib/tools`下的文件复制到`MIAO-YUNZAI`同名目录下
+将`lib/tools`下的文件硬链接到`MIAO-YUNZAI`同名目录下
 ```
-cp -r ./plugins/web-plugin/lib/tools/ ./lib/tools/
+ln ./plugins/web-plugin/lib/tools/webPluginCommand.js ./lib/tools/
 ```
+
+聊天室需要增加socket.io能力，修改MIAO-YUNZAI的package.json，在dependencies中增加依赖
+```
+"dependencies": {
+    "socket.io": "^4.8.1"
+  }
+```
+
 
 创建用户数据库
 ```
@@ -45,7 +53,7 @@ npx prisma db push
 cd ../../../
 ```
 
-修改pm2/pm2.json，增加部署内容
+修改config/pm2/pm2.json，增加部署内容
 ```
 {
       "name": "web-plugin-app",
@@ -64,6 +72,29 @@ cd ../../../
 
 第一次部署后需要先注册一个账号，发送一个消息获取uid，并添加到config/config/ohter.yaml的masterQQ中
 
+## 本地调试地址(直接运行可以无视)
+调试前需要修改MIAO-YUNZAI的package.json,在scripts中添加
+```
+"dev": "node . dev & node ./plugins/web-plugin/listener/listener.js dev & cd ./plugins/web-plugin/web-remix && pnpm run dev"
+```
+启动MIAO-YUNZAI & web-plugin调试
+```
+npm run dev
+```
+web-plugin默认地址一般如下，如果端口被占用，会显示在终端上
+```
+http://localhost:5173/
+```
+
+## 部署
+```
+pnpm run start
+```
+
+## 查看监控
+```
+pnpm pm2 monit
+```
 
 
 ## Yunzai版本与支持

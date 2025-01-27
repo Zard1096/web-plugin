@@ -1,18 +1,19 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction, ActionFunctionArgs,
+  LoaderFunctionArgs, redirect, json } from "@remix-run/node";
 
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-} from "@remix-run/node"; // or cloudflare/deno
-import { redirect, json } from "@remix-run/node"; // or cloudflare/deno
 import { useLoaderData, useActionData, useNavigation } from "@remix-run/react";
 import { getSession } from "../components/session";
 
+import { useLatest } from 'ahooks';
+
 import { getUserById } from "../.server/user/user.server";
 
-import axios from 'axios'
+import axios from 'axios';
 
-import fs from 'fs'
+import { useEffect, useState, useRef } from "react";
+
+import IMDetail from "../components/IM";
+import { IMUser } from "~/components/IM/types/models/User";
 
 
 export const meta: MetaFunction = () => {
@@ -93,9 +94,17 @@ export async function action({
 
 export default function Home() {
   const { user } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>()
-  const actionType = actionData?.type
-  const navigation = useNavigation()
+  // const actionData = useActionData<typeof action>()
+  // const actionType = actionData?.type
+  // const navigation = useNavigation()
+  const [firstSkip, setFirstSkip] = useState(0);
+  const test = useRef(0)
+
+  useEffect(() => {
+    console.log('home use effect', firstSkip, test.current);
+    test.current = test.current + 1
+    setFirstSkip(test.current)
+  }, [])
 
     return (
         <div>
@@ -103,7 +112,7 @@ export default function Home() {
               Welcome, {user?.name}
               <a href="./logout" type="link" className="text-blue-500">  Logout</a>
             </div>
-            <form method="POST" className="mt-10">
+            {/* <form method="POST" className="mt-10">
               <fieldset
                   disabled={navigation.state === "submitting"}
               >
@@ -117,9 +126,9 @@ export default function Home() {
                   Send
                 </button>
               </fieldset>
-            </form>
+            </form> */}
 
-            {actionData && actionType === 'text' && (
+            {/* {actionData && actionType === 'text' && (
               <div className="mt-10">
                 <p>{actionData.text}</p>
               </div>
@@ -131,7 +140,9 @@ export default function Home() {
                   id="actionImg"
                   src={`data:image/jpeg;base64,${actionData.data}`} />
               </div>
-            )}
+            )} */}
+
+          { firstSkip > 1 && <IMDetail user={user as IMUser} />}
         </div>
     )
 }

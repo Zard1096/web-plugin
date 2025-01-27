@@ -6,12 +6,15 @@ import WebPluginCommand from '../../../lib/tools/webPluginCommand.js'
 // import PluginsLoader from '../../../lib/plugins/loader.js'
 import crypto from 'crypto'
 import EventEmitter from 'eventemitter3'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
 const event = new EventEmitter()
 const app = express()
 // app.use(bodyParser.json())
 // app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
+// app.use(compression())
 app.use(express.urlencoded({ extended: true }))
 
 app.use((req, res, next) => {
@@ -19,6 +22,15 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })
+
+app.disable('x-powered-by')
+
+app.use(express.static('build/client', { maxAge: '1h' }))
+
+// app.use(morgan('tiny'))
+
+const httpServer = createServer(app)
+const io = new Server(httpServer)
 
 const createMessage = (data, msgId) => {
   let text = data.message || ''
@@ -69,7 +81,7 @@ const createMessage = (data, msgId) => {
 
 const resolveReplyMsg = (msg, level) => {
   const msgType = typeof (msg)
-  // console.log('====qqq resolveReplyMsg', msg, msgType, level)
+  console.log('====qqq resolveReplyMsg', msg, msgType, level)
   const result = level == 0 ? { stauts: 0 } : {}
   if (msgType === 'string') {
     if (msg === '超时' && level == 0) {
@@ -129,7 +141,7 @@ app.post('/api/post/message', function (req, res) {
     return
   }
 
-  let msgId = crypto.randomUUID()
+  let msgId = crypto.randomUUID() + '|' + commandData.uid + '|' + commandData.nickname
   const waitMessageReply = async () => {
     return new Promise((resolve) => {
       const timeout = setTimeout(() => {
@@ -168,4 +180,88 @@ app.post('/api/post/message', function (req, res) {
   // res.send('{"test":"test"}')
 })
 
-app.listen(8080)
+const userMap = new Map()
+io.on('connection', (socket) => {
+  console.log('====qqq a user connected', socket.id)
+
+  socket.on('disconnect', () => {
+    console.log('====qqq user disconnected', socket.id)
+    userMap.delete(socket.id)
+  })
+
+  socket.on('bind', (msg) => {
+    console.log('====qqq bind userId:', msg, ', socketid:', socket.id)
+    userMap.set(socket.id, msg)
+    console.log('====qqq current userMap:', userMap)
+  })
+
+  socket.on('userSendMessage', (msg) => {
+    console.log('====qqq message: ' + msg)
+    const userId = userMap.get(socket.id)
+    if (!userId) {
+      console.log('====qqq user not bind')
+      return
+    }
+
+    const { type, sender, senderName, content } = msg
+
+    let msgId = crypto.randomUUID() + '|' + sender + '|' + senderName
+    let e = createMessage({ message: content, uid: sender, username: senderName, role: 'normal' }, msgId)
+
+    WebPluginCommand.run(e)
+
+    io.emit('userShowMessage', {
+      msgId,
+      fromMsgId: '',
+      sender,
+      senderName,
+      fromSender: '',
+      fromSenderName: '',
+      createTime: new Date().getTime(),
+      type,
+      content
+    })
+  })
+})
+
+event.on('PostMessageEvent', (msg, uniqueId) => {
+  console.log('====qqq PostMessageEvent', msg, uniqueId)
+  const result = resolveReplyMsg(msg, 0)
+  console.log('====qqq PostMessageEvent resolve result', result)
+  const ids = uniqueId.split('|')
+  const userId = ids[1]
+  const username = ids[2]
+  const fromMsgId = ids[0]
+  const { type, text, image, user_id } = result.data
+  let content = ''
+  if (type === 'text') {
+    content = text
+  }
+  if (type === 'image') {
+    content = image
+  }
+  if (type === 'at') {
+    content = user_id
+  }
+
+  io.emit('userShowMessage', {
+    msgId: crypto.randomUUID(),
+    fromMsgId,
+    sender: 'Robot',
+    senderName: '机器人',
+    fromSender: userId,
+    fromSenderName: username,
+    createTime: new Date().getTime(),
+    type,
+    content
+  })
+})
+
+// app.listen(8080)
+httpServer.listen(8080, () => {
+  console.log('Server socket running on port 8080')
+})
+
+// http.listen(3000, () => {
+//   console.log('Server socket running on port 3000')
+// })

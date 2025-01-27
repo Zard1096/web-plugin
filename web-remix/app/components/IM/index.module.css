@@ -1,0 +1,7 @@
+
+.scroll_container {
+  height: 80vh; /* 设置容器高度 */
+  overflow-y: auto; /* 启用垂直滚动 */
+  border: 1px solid #ccc;
+  padding: 10px;
+}
