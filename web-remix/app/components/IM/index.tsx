@@ -19,12 +19,13 @@ export default function IMDetail(props: IMDetailProps) {
   const socket = useRef<Socket>(null);
   const [msgModels, setMsgModels] = useState<Message[]>([]);
   const latestMsgModels = useLatest(msgModels);
+  const websocketHost = process.env.WEBSOCKET_HOST;
 
   useEffect(() => {
     console.log('=====IM detail active', user)
 
     if (!socket.current && user.userId) {
-      socket.current = io('http://localhost:8080', {
+      socket.current = io(`http://${websocketHost}:8080`, {
         transports: ['websocket'],
       })
       console.log('====qqq socket init', socket.current?.id, socket.current?.connected)
