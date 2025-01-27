@@ -19,7 +19,7 @@ export default function IMDetail(props: IMDetailProps) {
   const socket = useRef<Socket>(null);
   const [msgModels, setMsgModels] = useState<Message[]>([]);
   const latestMsgModels = useLatest(msgModels);
-  const websocketHost = process.env.WEBSOCKET_HOST;
+  const websocketHost = import.meta.env.VITE_WEBSOCKET_HOST;
 
   useEffect(() => {
     console.log('=====IM detail active', user)

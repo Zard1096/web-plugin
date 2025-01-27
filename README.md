@@ -70,9 +70,9 @@ cd ../../../
 
 ```
 
-修改plugins/web-plugin/web-remix/.env，修改WEBSOCKET_HOST为你自己服务器的IP
+修改plugins/web-plugin/web-remix/.env，修改VITE_WEBSOCKET_HOST为你自己服务器的IP
 ```
-WEBSOCKET_HOST="127.0.0.1"
+VITE_WEBSOCKET_HOST="127.0.0.1"
 ```
 
 第一次部署后需要先注册一个账号，发送一个消息获取uid，并添加到config/config/ohter.yaml的masterQQ中
