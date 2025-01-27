@@ -142,7 +142,7 @@ export default function Home() {
               </div>
             )} */}
 
-          { firstSkip > 1 && <IMDetail user={user as IMUser} />}
+          { firstSkip >= 1 && <IMDetail user={user as IMUser} />}
         </div>
     )
 }
