@@ -25,8 +25,8 @@ export default function IMDetail(props: IMDetailProps) {
     console.log('=====IM detail active', user)
 
     if (!socket.current && user.userId) {
-      socket.current = io(`http://${websocketHost}:8080`, {
-        transports: ['websocket'],
+      socket.current = io(`http://${websocketHost}:9090`, {
+        transports: ['websocket','polling'],
       })
       console.log('====qqq socket init', socket.current?.id, socket.current?.connected)
 

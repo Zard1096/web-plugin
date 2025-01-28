@@ -75,6 +75,9 @@ cd ../../../
 VITE_WEBSOCKET_HOST="127.0.0.1"
 ```
 
+为了防止冲突websocket端口配置在9090，记得给服务器打开入网端口
+
+
 第一次部署后需要先注册一个账号，发送一个消息获取uid，并添加到config/config/ohter.yaml的masterQQ中
 
 ## 本地调试地址(直接运行可以无视)
